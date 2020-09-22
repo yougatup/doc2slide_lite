@@ -1,0 +1,17 @@
+.LeftPlane {
+    float: left;
+    width: 50%;
+    border: 1px solid black;
+    box-sizing: border-box;
+    height: 100%;
+}
+.statements {
+    text-align: left;
+    border: 1px solid black;
+    padding-left: 20px;
+}
+
+.sectionTitle {
+    text-align: left;
+    font-weight: bold;
+}

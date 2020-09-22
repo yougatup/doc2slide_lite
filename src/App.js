@@ -1,24 +1,50 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
+import LeftPlane from './LeftPlane.js'
+import RightPlane from './RightPlane.js'
 import logo from './logo.svg';
 import './App.css';
 
 function App() {
+  const [slideInfo, setSlideInfo] = useState([
+    {
+      slideType: "TITLE_AND_BODY",
+      title: "This_is_title",
+      body: [
+        "body1",
+        "body2"
+      ]
+    },
+    {
+      slideType: "IMAGES",
+      imageURL: [
+        "https://www.kixlab.org/assets/img/members/hyungyu.jpg"
+      ]
+    },
+    {
+      slideType: "TITLE_AND_BODY",
+      title: "This_is_title",
+      body: [
+        "body1",
+        "body2"
+      ]
+    },
+
+  ]);
+
+  const [resourceInfo, setResourceInfo] = useState([
+    {
+      "sectionTitle": "Abstract",
+      "body": [
+        "hello world!",
+        "this is second one"
+      ]
+    }
+  ])
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <LeftPlane slideInfo={slideInfo} resourceInfo={resourceInfo} setSlideInfo={setSlideInfo} setResourceInfo={setResourceInfo}> </LeftPlane>
+      <RightPlane slideInfo={slideInfo} resourceInfo={resourceInfo} setSlideInfo={setSlideInfo} setResourceInfo={setResourceInfo}> </RightPlane>
     </div>
   );
 }
