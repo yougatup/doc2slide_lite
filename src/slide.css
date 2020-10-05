@@ -1,9 +1,14 @@
+.Slide {
+  display: flex;
+  flex-wrap: wrap;
+}
 
 .slideBoundary {
     margin: 20px;
     height: 240px;
     width: 320px;
     border: 1px solid black;
+    float: left;
 }
 
 .slideTitle {
@@ -40,4 +45,24 @@
     display: block;
     margin: 0 auto;
     max-width: 80%;
+}
+
+.slideNote {
+    float: left;
+}
+
+.leftImage {
+    float: left;
+    margin :auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.rightImage {
+    float: left;
+    margin :auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }

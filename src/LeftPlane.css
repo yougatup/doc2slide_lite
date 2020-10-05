@@ -4,15 +4,43 @@
     border: 1px solid black;
     box-sizing: border-box;
     height: 100%;
-}
-.statements {
-    text-align: left;
-    /*border: 1px solid black;*/
-    padding-left: 20px;
-    margin: 2px;
+    overflow: auto;
 }
 
 .sectionTitle {
     text-align: left;
     font-weight: bold;
+}
+
+.sectionPortionSliders{
+    width: 80%;
+    margin: auto;
+}
+
+.sectionTitleRow {
+    width: 40%;
+}
+
+.portionRow {
+    width: 60%;
+}
+
+#portionTable {
+    width: 90%;
+    border: 1px solid black;
+    margin: 0 auto;
+    margin-top: 20px;
+}
+
+.sectionBodyRow {
+    text-align: left;
+}
+
+#textImageSlider {
+    margin-top: 30px;
+    margin-bottom: 20px;
+}
+
+#generateBtn {
+    font-size: 20px;
 }

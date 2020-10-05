@@ -11,7 +11,13 @@ const RightPlane = (props) => {
         {
             slideInfo.map((item, i) => {
                 return (
-                    <Slide slideIndex={i} type={item.slideType} title={item.title} body={item.body} imageURL={item.imageURL} />
+                    <Slide slideIndex={i} 
+                    type={item.slideType} 
+                    title={item.title} 
+                    body={item.body} 
+                    imageURL={item.imageURL}
+                    note={item.note}
+                     />
                 )
             })
         }

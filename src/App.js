@@ -1,122 +1,185 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import LeftPlane from './LeftPlane.js'
 import RightPlane from './RightPlane.js'
 import logo from './logo.svg';
 import './App.css';
 
 function App() {
-  const [slideInfo, setSlideInfo] = useState([
-    {
-      slideType: "TITLE_AND_BODY",
-      title: "This_is_title",
-      body: [
-        "body1",
-        "body2"
-      ]
-    },
-    {
-      slideType: "IMAGES",
-      imageURL: [
-        "https://www.kixlab.org/assets/img/members/hyungyu.jpg"
-      ]
-    },
-    {
-      slideType: "TITLE_AND_BODY",
-      title: "This_is_title",
-      body: [
-        "body1",
-        "body2"
-      ]
-    },
+  const initialLoadingFlag = false;
 
-  ]);
+  const [probList, setProbList] = useState([]);
+  const [thresholdValue, setThresholdValue] = useState(0);
+  
+  const [slideInfo, setSlideInfo] = useState([]);
 
-  const [resourceInfo, setResourceInfo] = useState([
-    {
-      "sectionTitle": "1. Introduction",
-      "body": [
-        "Informal presentations are lightweight ways for people to communicate ideas to others for feedback and modification.",
-        "Freeform sketches are easily produced and are sufficiently expressive to convey a wide variety of information." ,
-        "Current software tools provide abundant functionality to customize detailed slides for formal presentations.",
-        "From the start of designing a presentation, presenters often become obsessed by design details, such as colors and fonts, which are unnecessary for quickly communicating ideas in an informal setting.",
-        "we built SketchPoint (see Figure 1), a system supporting informal presentation design",
-        "SketchPoint enables users to quickly author presentations by sketching slide content, overall hierarchical structures, and hyperlinks.",
-        "Slides are organized in a storyboard from which users can directly present their slides." ,
-        "a note-taking workspace allows presenters to pick notes for use in slides.",
-      ]
-    },
-    {
-      "sectionTitle": "3. Current Practice",
-      "body": [
-        "To learn more about the practice of informal presentation for idea communication, we studied researchers both in our laboratory and at our university.",
-      ]
-    },
-    {
-      "sectionTitle": "3-1. Idea Communication",
-      "body": [
-        "Idea communication is an important step in furthering draft ideas by clarifying them and gathering suggestions from others",
-        "Informal presentations are often used for communicating ideas in small groups.",
-        "Our participants said sketching is also helpful to clarify draft ideas and make abstract ideas concrete." ,
-        "frequent internal idea communication still relies on pen-and-paper-based informal presentations.",
-        "informal presentations seem to welcome more feedback and resulting modification, which is important for getting an idea right.",
-        "more formal presentations are suitable for idea publication (see Figure 2), which is infrequent enough to allow for relatively long and detailed preparation.",
-        "note taking is an important preparation step and a source of material for informal presentations.",
-      ]
-    },
-    {
-      "sectionTitle": "3-2. Creating Informal Preentations",
-      "body": [
-        "We asked our participants how they currently create and conduct informal presentations and what kinds of schemes they use to organize their information.",
-        "researchers usually started with their paper notebooks, which contain captured ideas from their daily work life and some rough organization of information for presentation.",
-        "a tree-like hierarchical structure is the most frequently used organization scheme.",
-        "This organization is efficient for presenters to organize content in a logical way, and it is also makes it easy for the audience to understand the big",
-        "structures of title-list or title-graphic are common organizations of information (see Figure 3).",
-        "we distilled two major information organizations of informal presentation as shown in Figure 4",
-      ]
-    },
-    {
-      "sectionTitle": "3-3. Problems Creating Presentations",
-      "body": [
-        "there was no efficient electronic tool to help our participants with their informal presentations.",
-        "People prefer the pen-and-paper metaphor for informal presentations.",
-        "Although commercial electronic whiteboard systems make it easier to capture and edit information than with physical whiteboards, it is still difficult to use these systems for informal communication since they do not support higher level semantics.",
-      ]
-    },
-    {
-      "sectionTitle": "4. The Sketchpoint System",
-      "body": [
-        "we designed SketchPoint to support and enhance informal presentations.",
-        "The design of SketchPoint is based on the pen-and-paper metaphor."
-      ]
-    },
-  ])
+  const [resourceInfo, setResourceInfo] = useState([])
 
-  useEffect(() => {
+  function computeThreshold(cnt) {
+    setThresholdValue(probList[probList.length-cnt-1]);
+  }
 
-    for(var i=0;i<resourceInfo.length;i++) {
-      for(var j=0;j<resourceInfo[i].body.length;j++) {
-        var t = resourceInfo[i].body[j];
+  function computeScores() {
+    var prob = [];
 
-      var xhr = new XMLHttpRequest()
+    prob.push(0);
+    prob.push(1);
 
-        // get a callback when the server responds
-        xhr.addEventListener('load', (r) => {
-          // update the state of the component with the result here
-          console.log(r.currentTarget.responseText)
-          console.log(i, j)
-        })
-        // open the request with the verb and the url
-        xhr.open('GET', 'http://hyungyu.com:3333?text=' + t)
-        // send the request
-        xhr.send()
+    for (var k = 0; k < resourceInfo.length; k++) {
+      var resource = resourceInfo[k];
 
+      for (var i = 0; i < resource.body.length; i++) {
+        var stmt = resource.body[i].bodyText;
+        var entities = resource.body[i].entity.entity;
+
+        var retValue = [];
+        var splitted = stmt.split(' ');
+        var cnt = 0;
+
+        for (var j = 0; j < splitted.length; j++) {
+          if (entities.includes(splitted[j])) {
+            cnt++;
+          }
+        }
+
+        var score = cnt / splitted.length;
+
+        resource.body[i].score = score;
+
+        prob.push(score);
       }
     }
+
+    prob.sort();
+
+    setResourceInfo(resourceInfo);
+    setProbList(prob);
+  }
+
+  function convertToSlide(resource, threshold) {
+    var returnValue = [];
+
+    for (var i = 0; i < resource.body.length; i++) {
+      var stmt = resource.body[i].bodyText;
+      var entities = resource.body[i].entity.entity;
+
+      if(resource.body[i].score >= threshold) {
+        returnValue.push(
+          {
+            slideType: "IMAGES",
+            imageURL: [
+              resource.body[i].imageResult
+            ],
+            note: [
+              resource.body[i].bodyText
+            ]
+          })
+      }
+      else {
+        var createFlag = false;
+
+        if(returnValue.length == 0 || returnValue[returnValue.length-1].slideType == "IMAGES") createFlag = true;
+        else if(returnValue[returnValue.length-1].body.length >= 3) createFlag = true;
+
+        if(createFlag) 
+          returnValue.push(
+            {
+              slideType: "TITLE_AND_BODY",
+              title: resource.sectionTitle,
+              body: [
+                resource.body[i].bodyText
+              ]
+            },
+          )
+        else 
+            returnValue[returnValue.length-1].body.push(resource.body[i].bodyText);
+      }
+    }
+
+    return returnValue;
+  }
+
+  function constructSlide(threshold) {
+    var slideInfo = [];
+
+    for (var i = 0; i < resourceInfo.length; i++) {
+      slideInfo = slideInfo.concat(convertToSlide(resourceInfo[i], threshold));
+    }
+
+    setSlideInfo(slideInfo);
+  }
+
+  useEffect( () => {
+    constructSlide(thresholdValue);
+  }, [thresholdValue])
+
+  useEffect(() => {
+    computeScores();
+    constructSlide(1);
+  }, [resourceInfo])
+
+  useEffect(() => {
+    if (resourceInfo.length > 0) return;
+
+    async function fetchData() {
+      const response = await fetch('http://3.35.118.122:3000/data.txt')
+      const reader = response.body.getReader()
+
+      var chunks = [];
+      var receivedLength = 0;
+
+      function process(chunks, receivedLength) {
+        // Step 4: concatenate chunks into single Uint8Array
+        let chunksAll = new Uint8Array(receivedLength); // (4.1)
+        let position = 0;
+        for (let chunk of chunks) {
+          chunksAll.set(chunk, position); // (4.2)
+          position += chunk.length;
+        }
+
+        // Step 5: decode into a string
+        let merged = new TextDecoder("utf-8").decode(chunksAll);
+
+        var data = JSON.parse(merged);
+
+        setResourceInfo(data);
+      }
+
+      const stream = new ReadableStream({
+        start(controller) {
+          // The following function handles each data chunk
+          function push() {
+            // "done" is a Boolean and value a "Uint8Array"
+            reader.read().then(({ done, value }) => {
+              // Is there no more data to read?
+              if (done) {
+                // Tell the browser that we have finished sending data
+                controller.close();
+
+                process(chunks, receivedLength)
+
+                return;
+              }
+
+              chunks.push(value);
+              receivedLength += value.length;
+
+              // Get the data and send it to the browser via the controller
+              controller.enqueue(value);
+              push();
+            });
+          };
+
+          push();
+        }
+      });
+    }
+
+    var result = fetchData();
   })
   return (
     <div className="App">
-      <LeftPlane slideInfo={slideInfo} resourceInfo={resourceInfo} setSlideInfo={setSlideInfo} setResourceInfo={setResourceInfo}> </LeftPlane>
-      <RightPlane slideInfo={slideInfo} resourceInfo={resourceInfo} setSlideInfo={setSlideInfo} setResourceInfo={setResourceInfo}> </RightPlane>
+      <LeftPlane slideInfo={slideInfo} resourceInfo={resourceInfo} computeThreshold={computeThreshold}> </LeftPlane>
+      <RightPlane slideInfo={slideInfo} resourceInfo={resourceInfo}> </RightPlane>
     </div>
   );
 }
